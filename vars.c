@@ -1,85 +1,61 @@
 #include "shell.h"
 
-/**
- * is_chain - Tests if the current character in the buffer is a chain delimiter.
- * @info: The parameter struct.
- * @buf: The char buffer.
- * @p: Address of the current position in buf.
- *
- * Return: 1 if chain delimiter, 0 otherwise.
- */
 int is_chain(info_t *info, char *buf, size_t *p)
 {
-    size_t j = *p;
+    size_t pos = *p;
 
-    if (buf[j] == '|' && buf[j + 1] == '|')
+    if (buf[pos] == '|' && buf[pos + 1] == '|')
     {
-        buf[j] = 0;
-        j++;
+        buf[pos] = 0;
+        pos++;
         info->cmd_buf_type = CMD_OR;
     }
-    else if (buf[j] == '&' && buf[j + 1] == '&')
+    else if (buf[pos] == '&' && buf[pos + 1] == '&')
     {
-        buf[j] = 0;
-        j++;
+        buf[pos] = 0;
+        pos++;
         info->cmd_buf_type = CMD_AND;
     }
-    else if (buf[j] == ';') /* found end of this command */
+    else if (buf[pos] == ';')
     {
-        buf[j] = 0; /* replace semicolon with null */
+        buf[pos] = 0;
         info->cmd_buf_type = CMD_CHAIN;
     }
     else
         return (0);
-    *p = j;
+    *p = pos;
     return (1);
 }
 
-/**
- * check_chain - Checks if we should continue chaining based on the last status.
- * @info: The parameter struct.
- * @buf: The char buffer.
- * @p: Address of the current position in buf.
- * @i: Starting position in buf.
- * @len: Length of buf.
- *
- * Return: Void.
- */
-void check_chain(info_t *info, char *buf, size_t *p, size_t i, size_t len)
+void check_chain(info_t *info, char *buf, size_t *p, size_t start_pos, size_t length)
 {
-    size_t j = *p;
+    size_t pos = *p;
 
     if (info->cmd_buf_type == CMD_AND)
     {
         if (info->status)
         {
-            buf[i] = 0;
-            j = len;
+            buf[start_pos] = 0;
+            pos = length;
         }
     }
     if (info->cmd_buf_type == CMD_OR)
     {
         if (!info->status)
         {
-            buf[i] = 0;
-            j = len;
+            buf[start_pos] = 0;
+            pos = length;
         }
     }
 
-    *p = j;
+    *p = pos;
 }
 
-/**
- * replace_alias - Replaces an alias in the tokenized string.
- * @info: The parameter struct.
- *
- * Return: 1 if replaced, 0 otherwise.
- */
 int replace_alias(info_t *info)
 {
     int i;
     list_t *node;
-    char *p;
+    char *ptr;
 
     for (i = 0; i < 10; i++)
     {
@@ -87,23 +63,17 @@ int replace_alias(info_t *info)
         if (!node)
             return (0);
         free(info->argv[0]);
-        p = _strchr(node->str, '=');
-        if (!p)
+        ptr = _strchr(node->str, '=');
+        if (!ptr)
             return (0);
-        p = _strdup(p + 1);
-        if (!p)
+        ptr = _strdup(ptr + 1);
+        if (!ptr)
             return (0);
-        info->argv[0] = p;
+        info->argv[0] = ptr;
     }
     return (1);
 }
 
-/**
- * replace_vars - Replaces vars in the tokenized string.
- * @info: The parameter struct.
- *
- * Return: 1 if replaced, 0 otherwise.
- */
 int replace_vars(info_t *info)
 {
     int i = 0;
@@ -116,21 +86,18 @@ int replace_vars(info_t *info)
 
         if (!_strcmp(info->argv[i], "$?"))
         {
-            replace_string(&(info->argv[i]),
-                            _strdup(convert_number(info->status, 10, 0)));
+            replace_string(&(info->argv[i]), _strdup(convert_number(info->status, 10, 0)));
             continue;
         }
         if (!_strcmp(info->argv[i], "$$"))
         {
-            replace_string(&(info->argv[i]),
-                            _strdup(convert_number(getpid(), 10, 0)));
+            replace_string(&(info->argv[i]), _strdup(convert_number(getpid(), 10, 0)));
             continue;
         }
         node = node_starts_with(info->env, &info->argv[i][1], '=');
         if (node)
         {
-            replace_string(&(info->argv[i]),
-                            _strdup(_strchr(node->str, '=') + 1));
+            replace_string(&(info->argv[i]), _strdup(_strchr(node->str, '=') + 1));
             continue;
         }
         replace_string(&info->argv[i], _strdup(""));
@@ -138,16 +105,9 @@ int replace_vars(info_t *info)
     return (0);
 }
 
-/**
- * replace_string - Replaces a string.
- * @old: Address of the old string.
- * @new: New string.
- *
- * Return: 1 if replaced, 0 otherwise.
- */
-int replace_string(char **old, char *new)
+int replace_string(char **old_str, char *new_str)
 {
-    free(*old);
-    *old = new;
+    free(*old_str);
+    *old_str = new_str;
     return (1);
 }
