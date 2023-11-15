@@ -1,75 +1,56 @@
 #include "shell.h"
 
-/**
- * _strncpy - Copies a string.
- * @dest: The destination string to be copied to.
- * @src: The source string.
- * @n: The number of characters to be copied.
- * Return: The concatenated string.
- */
-char *_strncpy(char *dest, char *src, int n)
+char *_string_copy_n(char *destination, char *source, int max_chars)
 {
     int i, j;
-    char *s = dest;
+    char *starting_point = destination;
 
     i = 0;
-    while (src[i] != '\0' && i < n - 1)
+    while (source[i] != '\0' && i < max_chars - 1)
     {
-        dest[i] = src[i];
+        destination[i] = source[i];
         i++;
     }
-    if (i < n)
+    if (i < max_chars)
     {
         j = i;
-        while (j < n)
+        while (j < max_chars)
         {
-            dest[j] = '\0';
+            destination[j] = '\0';
             j++;
         }
     }
-    return (s);
+    return (starting_point);
 }
 
-/**
- * _strncat - Concatenates two strings.
- * @dest: The first string.
- * @src: The second string.
- * @n: The number of bytes to be maximally used.
- * Return: The concatenated string.
- */
-char *_strncat(char *dest, char *src, int n)
+char *_string_concat_n(char *destination, char *source, int max_bytes)
 {
     int i, j;
-    char *s = dest;
+    char *starting_point = destination;
 
     i = 0;
     j = 0;
-    while (dest[i] != '\0')
+    while (destination[i] != '\0')
         i++;
-    while (src[j] != '\0' && j < n)
+    while (source[j] != '\0' && j < max_bytes)
     {
-        dest[i] = src[j];
+        destination[i] = source[j];
         i++;
         j++;
     }
-    if (j < n)
-        dest[i] = '\0';
-    return (s);
+    if (j < max_bytes)
+        destination[i] = '\0';
+    return (starting_point);
 }
 
-/**
- * _strchr - Locates a character in a string.
- * @s: The string to be parsed.
- * @c: The character to look for.
- * Return: (s) A pointer to the memory area s.
- */
-char *_strchr(char *s, char c)
+char *_string_find_char(char *string, char character)
 {
     do
     {
-        if (*s == c)
-            return (s);
-    } while (*s++ != '\0');
+        if (*string == character)
+            return (string);
+    } while (*string++ != '\0');
 
     return (NULL);
 }
+     
